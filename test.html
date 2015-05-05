@@ -29,7 +29,10 @@
 </tbody>
 </table>
 <script type="text/javascript">
-$.fn.colorizeTable($('#colorizeMe'));
+$.fn.colorizeTable({
+    table: $('#colorizeMe'),
+    columns: [1]
+});
 </script>
 </body>
 </html>
