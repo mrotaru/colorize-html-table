@@ -9,20 +9,6 @@
 }(function ($) {
 
   /*
-   * Calculate a color for the given percentage. The higher the
-   * percentage, the redder the returned color.
-   *
-   * @param {Number} percent 0 to 100
-   * @returns {String} a string like 'rgb(r,g,b)'
-   */
-  function getColorForPercent(percent) {
-    R = (255 * percent) / 100;
-    G = (255 * (100 - percent)) / 100;
-    B = 0;
-    return 'rgb(' + Math.round(R) + ', ' + Math.round(G) + ', 0)';
-  }
-
-  /*
    * Colorize columns in a table
    * 
    * @param {JQuery} table
@@ -32,22 +18,42 @@
 
     var settings = $.extend({
       table: null,
-      columns: [1]
+      columns: [1],
+      invert: false
     }, options);
 
-    // colorize a single column
+    /*
+     * Calculate a color for the given percentage. The higher the
+     * percentage, the redder the returned color.
+     * @param {Number} percent 0 to 100
+     * @param {Bool} invert if true, lower precentages are redder
+     * @returns {String} a string like 'rgb(r,g,b)'
+     */
+    function getColorForPercent(percent) {
+      var percent = percent;
+      if(settings.invert) {
+        percent = 100 - percent;
+      }
+      R = (255 * percent) / 100;
+      G = (255 * (100 - percent)) / 100;
+      B = 0;
+      return 'rgb(' + Math.round(R) + ', ' + Math.round(G) + ', 0)';
+    }
+
+    /*
+     *  Colorize a single column in settings.table
+     *  @param {Integer} columnIndex
+     *  @returns {undefined}
+     */
     function colorizeColumn(columnIndex) {
       settings.table.find('tr td:nth-child(' + columnIndex + ')').each(function() {
         var n = parseInt($(this).text());
-        console.log(n);
         if(!isNaN(n)) {
-          console.log(getColorForPercent(n));
           $(this).css('background-color', getColorForPercent(n));
         }
       });
     }
 
-    console.log(typeof settings.columns);
     if(typeof settings.columns == 'number' && settings.columns % 1 === 0) {
       colorizeColumn(settings.coumns);
     } else if($.isArray(settings.columns)) {
