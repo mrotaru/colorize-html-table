@@ -19,10 +19,20 @@
     var settings = $.extend({
       table: null,
       columns: [1],
-      invert: false
+      invert: false,
+      relativeScale: true,
+      min: null,
+      max: null
     }, options);
 
-    /*
+    // validate
+    if(settings.min !== null && settings.max !== null) {
+      settings.relativeScale = false;
+    } else {
+      settings.relativeScale = true;
+    }
+
+    /**
      * Calculate a color for the given percentage. The higher the
      * percentage, the redder the returned color.
      * @param {Number} percent 0 to 100
@@ -40,16 +50,42 @@
       return 'rgb(' + Math.round(R) + ', ' + Math.round(G) + ', 0)';
     }
 
-    /*
+    /**
      *  Colorize a single column in settings.table
      *  @param {Integer} columnIndex
      *  @returns {undefined}
      */
     function colorizeColumn(columnIndex) {
+      var min = settings.min;
+      var max = settings.max;
+
+      // if relativeScale, then find min and max values for the column
+      if(settings.relativeScale) {
+        settings.table.find('tr td:nth-child(' + columnIndex + ')').each(function() {
+          var n = parseFloat($(this).text());
+          if(!isNaN(n)) {
+            if(n > max || max === null) {
+              max = n;
+            }
+            if(n < min || min === null ) {
+              min = n;
+            }
+          }
+        });
+      }
+
+      // used for calculating percentage
+      var difference = max - min;
+      console.log(max,min);
+      console.log('diff: ', difference);
+
+      // go over each cell and colorize it
       settings.table.find('tr td:nth-child(' + columnIndex + ')').each(function() {
-        var n = parseInt($(this).text());
+        var n = parseFloat($(this).text());
         if(!isNaN(n)) {
-          $(this).css('background-color', getColorForPercent(n));
+          var percentage = (n - min) * 100 / difference;
+          console.log('perc: ', percentage);
+          $(this).css('background-color', getColorForPercent(percentage));
         }
       });
     }
