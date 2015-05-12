@@ -84,10 +84,9 @@
    * @param {JQuery} table
    * @param {Integer|Array} column which column(s) should be colorized
    */
-  $.fn.colorizeTable = function (options) {
+  $.fn.colorize = function (options) {
 
     var settings = $.extend({
-      table: null,
       columns: [1],
       invert: false,
       relativeScale: true,
@@ -101,12 +100,16 @@
     } else {
       settings.relativeScale = true;
     }
+    if(!$(this).is('table')) {
+      console.error('Not a table: ' + $(this));
+      return;
+    }
+    var table = $(this);
 
     /**
      * Calculate a color for the given percentage. The higher the
      * percentage, the redder the returned color.
      * @param {Number} percent 0 to 100
-     * @param {Bool} invert if true, lower precentages are redder
      * @returns {String} a string like 'rgb(r,g,b)'
      */
     function getColorForPercent(percent) {
@@ -115,12 +118,12 @@
         percent = 100 - percent;
       }
       var hue = (percent*33)/100/100;
-      var color = hslToRgb(hue, 1, 0.35);
+      var color = hslToRgb(hue, 1, 0.65);
       return 'rgb(' + Math.round(color.r) + ', ' + Math.round(color.g) + ', ' + Math.round(color.b) + ')';
     }
 
     /**
-     *  Colorize a single column in settings.table
+     *  Colorize a single column in table
      *  @param {Integer} columnIndex
      *  @returns {undefined}
      */
@@ -130,7 +133,7 @@
 
       // if relativeScale, then find min and max values for the column
       if(settings.relativeScale) {
-        settings.table.find('tr td:nth-child(' + columnIndex + ')').each(function() {
+        table.find('tr td:nth-child(' + columnIndex + ')').each(function() {
           var n = parseFloat($(this).text());
           if(!isNaN(n)) {
             if(n > max || max === null) {
@@ -147,7 +150,7 @@
       var difference = max - min;
 
       // go over each cell and colorize it
-      settings.table.find('tr td:nth-child(' + columnIndex + ')').each(function() {
+      table.find('tr td:nth-child(' + columnIndex + ')').each(function() {
         var n = parseFloat($(this).text());
         if(!isNaN(n)) {
           var percentage = (n - min) * 100 / difference;
